@@ -1,8 +1,10 @@
 # SemiSupervisedGraphClustering
-Implementation of the semi supervised graph clustering algorithm
+Implementation of the semi supervised graph clustering algorithm, also known as SS-KERNEL-KMEANS or SSK-KMEANS.
 
 ## Project
-Implementation of the graph clustering presented in [Semi-supervised Graph Clustering: A Kernel Approach](https://pdfs.semanticscholar.org/0bac/ca0993a3f51649a6bb8dbb093fc8d8481ad4.pdf)
+Implementation of the graph clustering presented in [Semi-supervised Graph Clustering: A Kernel Approach](http://www.cs.utexas.edu/~inderjit/public_papers/kernel_icml.pdf)
+
+Kulis, Brian, et al. "Semi-supervised graph clustering: a kernel approach." Machine learning 74.1 (2009): 1-22.
 
 ## Remarks
 ### Constraints
