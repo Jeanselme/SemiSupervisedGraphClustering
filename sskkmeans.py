@@ -2,8 +2,48 @@
     Semi Supervised Graph Clustering
 """
 import numpy as np
+from numba import jit
 from KernelConstrainedKmeans.initialization import Initialization
 from KernelConstrainedKmeans.wkckmeans import weightedKernelConstrainedKmeans
+
+@jit(nopython=True)
+def fast_verification(row, col, data, assignation):
+    respected, broken = 0, 0
+    for i, j, val in zip(row, col, data):   
+        if assignation[i] == assignation[j] and val > 0:
+            respected += 1
+        elif assignation[i] != assignation[j] and val < 0:
+            respected += 1
+        else:
+            broken += 1
+    return respected, broken
+
+def verification_constraint(constraint_matrix, assignation):
+    """
+        Returns the number of constraint verified and broken
+        
+        Arguments:
+            constraint_matrix {Array n*n} -- Constraint matrix
+            assignation {Array n} -- Assignation
+
+        Returns:
+            number constraint respected, number constraint broken
+    """
+    return fast_verification(constraint_matrix.row, constraint_matrix.col, constraint_matrix.data, assignation)
+
+def kta_score(constraint_matrix, assignation):
+    """
+        Returns the kta score
+        
+        Arguments:
+            constraint_matrix {Array n*n} -- Constraint matrix
+            assignation {Array n} -- Assignation
+
+        Returns:
+            KTA Score
+    """
+    respected, broken = verification_constraint(constraint_matrix, assignation)
+    return respected / (respected + broken)
 
 def ssKmeans(affinity, assignation, objective, constraints, max_iteration = 100):
     """
@@ -71,11 +111,11 @@ def crossValidationSskmeans(affinities, k, objective, constraints, max_iteration
     for affinity in affinities:
         initialization =  initializer.farthest_initialization(affinity)
         assignation = ssKmeans(affinity, initialization, objective, constraints)
-        observed_constraint = 2 * np.equal.outer(assignation, assignation) - 1.0
-        score = np.dot(observed_constraint.ravel(), constraints.ravel())
+        score = kta_score(constraints, assignation)
         
         if best_score is None or best_score < score:
             best_score = score
             best_assignation = assignation
         
     return best_assignation
+
