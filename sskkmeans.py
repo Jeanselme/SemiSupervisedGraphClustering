@@ -69,7 +69,7 @@ def ssKmeans(affinity, assignation, objective, constraints, max_iteration = 100)
 
     if objective == "ratio association":
         weights = np.ones(n)
-        affinity = affinity.copy() - degrees
+        affinity = affinity.copy() - np.diag(degrees)
     elif objective == "ratio cut":
         weights = np.ones(n)
     elif objective == "normalized cut":
@@ -82,10 +82,10 @@ def ssKmeans(affinity, assignation, objective, constraints, max_iteration = 100)
 
     # Computes kernel
     kernel = np.matmul(invWeights, (affinity + constraints))
-    sigma = - np.trace(kernel) / n # Value for diagonal shifting
+    sigma = 0.001 * np.ones(n) # Value for diagonal shifting
     kernel = np.matmul(sigma + kernel, invWeights)
 
-    # Oringial paper does not enforce constraints
+    # Oringial paper does not enforce constraints : Set to None
     return weightedKernelConstrainedKmeans(kernel, assignation, None, weights, max_iteration)
 
 def crossValidationSskmeans(affinities, k, objective, constraints, max_iteration = 100):
