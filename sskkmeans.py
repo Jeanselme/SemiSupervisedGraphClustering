@@ -82,7 +82,7 @@ def ssKmeans(affinity, assignation, objective, constraints, max_iteration = 100)
 
     # Computes kernel
     kernel = np.matmul(invWeights, (affinity + constraints))
-    sigma = 0.001 * np.ones(n) # Value for diagonal shifting
+    sigma = 0.001 * np.eye(n) # Value for diagonal shifting
     kernel = np.matmul(sigma + kernel, invWeights)
 
     # Oringial paper does not enforce constraints : Set to None
