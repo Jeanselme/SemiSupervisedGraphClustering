@@ -121,6 +121,7 @@ def holdOutSskmeans(affinities, k, objective, constraints, evaluation = None, ma
         if best_score is None or best_score < score:
             best_score = score
             best_affinity = affinity
-    
+            
+    initializer = Initialization(k, evaluation)
     initialization =  initializer.farthest_initialization(best_affinity)
     return ssKmeans(best_affinity, initialization, objective, evaluation)
