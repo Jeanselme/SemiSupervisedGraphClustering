@@ -88,9 +88,10 @@ def ssKmeans(affinity, assignation, objective, constraints, max_iteration = 100)
     # Oringial paper does not enforce constraints : Set to None
     return weightedKernelConstrainedKmeans(kernel, assignation, None, weights, max_iteration)
 
-def crossValidationSskmeans(affinities, k, objective, constraints, max_iteration = 100):
+def holdOutSskmeans(affinities, k, objective, constraints, evaluation = None, max_iteration = 100):
     """
-        Computes a cross validation on the different affinities matrices 
+        Computes the performances of the different affinities matrices 
+        On a hold out set of constraints
         Which maximizes the number of constraints respected
 
         Arguments:
@@ -98,6 +99,7 @@ def crossValidationSskmeans(affinities, k, objective, constraints, max_iteration
             k {Int} -- Number of cluster
             objective {str} -- Objective to compute ("ratio association", "ratio cut", "normalized cut")
             constraints {Array n*n} -- Constraints matrix with value between -1 and 1
+            evaluation {Array n*n} -- Constraints matrix with value between -1 and 1 (Superset of constraints)
 
         Keyword Arguments:
             max_iteration {int} -- Maximum iteration (default: {100})
@@ -107,15 +109,18 @@ def crossValidationSskmeans(affinities, k, objective, constraints, max_iteration
     """
     initializer = Initialization(k, constraints)
 
-    best_assignation, best_score = None, None
+    best_affinity, best_score = None, None
     for affinity in affinities:
         initialization =  initializer.farthest_initialization(affinity)
         assignation = ssKmeans(affinity, initialization, objective, constraints)
-        score = kta_score(constraints, assignation)
+        if evaluation is None:
+            score = kta_score(constraints, assignation)
+        else:
+            score = kta_score(evaluation, assignation)
         
         if best_score is None or best_score < score:
             best_score = score
-            best_assignation = assignation
-        
-    return best_assignation
-
+            best_affinity = affinity
+    
+    initialization =  initializer.farthest_initialization(best_affinity)
+    return ssKmeans(best_affinity, initialization, objective, evaluation)
